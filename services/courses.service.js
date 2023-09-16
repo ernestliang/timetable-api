@@ -11,7 +11,7 @@ const coursesServices = {
         })
     },
     getById: async function(req, res, next) {
-        await connObjectName.query('select * from courses where id = ?', [req.params.id])
+        await connObjectName.query('select id as courseId, course_name as courseName, code as courseCode, status as courseStatus from courses where id = ?', [req.params.id])
         .then( ( [data, columns] ) => {
             res.json(data)
         })

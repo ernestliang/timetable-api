@@ -68,6 +68,17 @@ const subjectsServices = {
             res.status(500).json(err.message)
         })
     },
+    mark: async function(req, res, next) {
+        let model = req.body;
+
+        await connObjectName.execute(`update subjects set status = ${model.status} where id = ${model.id}`)
+            .then(result => {
+                res.json(result[0].changedRows)
+            })
+            .catch(err => {
+                res.status(500).json(err.message)
+            })
+    }
 }
 
 module.exports = subjectsServices

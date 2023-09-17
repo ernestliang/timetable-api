@@ -16,6 +16,8 @@ router.route('/course/id/:id')
 router.route('/course')
     .put(coursesServices.update)
     .post(coursesServices.insert)
+router.route('/course/mark')
+    .put(coursesServices.mark)
 
 module.exports = router
 

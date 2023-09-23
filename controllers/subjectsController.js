@@ -6,10 +6,12 @@ router.route('/subjects')
     .get(subjectsServices.getComplete)
 router.route('/subject/id/:id')
     .get(subjectsServices.getById)
-router.route('/subject/courseId/:courseId')
+router.route('/subject/course/:courseId')
     .get(subjectsServices.getByCourseId)
 router.route('/subject')
     .put(subjectsServices.update)
     .post(subjectsServices.insert)
+router.route('/subject/mark')
+    .put(subjectsServices.mark)
 
 module.exports = router

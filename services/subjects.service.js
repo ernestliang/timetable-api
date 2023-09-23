@@ -1,6 +1,6 @@
 const connObjectName = require('../utilities/dbConnection')
 
-const leftJoinQuery =  `select t1.id AS subjectId, t1.subject_name AS subjectName, t1.code AS subjectCode,
+const leftJoinQuery =  `select t1.id AS subjectId, t1.subject_name AS subjectName, t1.code AS subjectCode, t1.status as status, t1.color as color,
                                     t2.id AS courseId, t2.course_name AS courseName, t2.code AS courseCode
                                         FROM subjects t1
                                             LEFT JOIN courses t2 ON t1.course_id = t2.id`
@@ -47,8 +47,8 @@ const subjectsServices = {
     update: async function(req, res, next) {
         let model = req.body
 
-        await connObjectName.execute(`update subjects set subject_name = ?, course_id = ?, code = ? where id = ?`,
-        [model.subjectName, model.courseId, model.code, model.id])
+        await connObjectName.execute(`update subjects set subject_name = ?, course_id = ?, code = ?, color = ? where id = ?`,
+        [model.subjectName, model.courseId, model.subjectCode, model.color, model.subjectId])
         .then(result => {
             res.json(result[0].changedRows)
         })
@@ -59,8 +59,8 @@ const subjectsServices = {
     insert: async function(req, res, next) {
         let model = req.body;
 
-        await connObjectName.execute(`insert into subjects (subject_name, course_id, code) values (?, ?, ?)`,
-        [model.subjectName, model.courseId, model.code])
+        await connObjectName.execute(`insert into subjects (subject_name, course_id, code, color) values (?, ?, ?, ?)`,
+        [model.subjectName, model.courseId, model.subjectCode, model.color])
         .then ( result => {
             res.json(result[0].affectedRows)
         })
@@ -71,7 +71,7 @@ const subjectsServices = {
     mark: async function(req, res, next) {
         let model = req.body;
 
-        await connObjectName.execute(`update subjects set status = ${model.status} where id = ${model.id}`)
+        await connObjectName.execute(`update subjects set status = ${model.status} where id = ${model.subjectId}`)
             .then(result => {
                 res.json(result[0].changedRows)
             })

@@ -1,12 +1,15 @@
 const connObjectName = require('../utilities/dbConnection')
-const leftJoinQuery = `SELECT t1.id AS timetableId, t1.subject_id AS subjectId, t2.subject_name AS subjectName, t2.code AS subjectCode, t3.course_name AS courseName, t3.code AS courseCode, t1.start_time AS startTime, t1.end_time AS endTime, t1.day
+const leftJoinQuery = `SELECT t1.id AS timetableId, t1.subject_id AS subjectId, t2.subject_name AS subjectName, t2.code AS subjectCode,
+                        t3.course_name AS courseName, t3.code AS courseCode, t1.start_time AS startTime, t1.end_time AS endTime, t1.class_day as classDay,
+                        t4.code as classroomCode, t4.description as locationDes,
                         FROM timetable t1
                             LEFT JOIN subjects t2 ON t1.subject_id = t2.id
-                            LEFT JOIN courses t3 ON t2.course_id = t3.id`
+                            LEFT JOIN courses t3 ON t2.course_id = t3.id
+                            LEFT JOIN locations t4 on t4.subject_id = t2.id`
 
 const timetableServices = {
     getAll: async function(req, res, next) {
-        await connObjectName.query(`select * from timetable`)
+        await connObjectName.query(`${leftJoinQuery}`)
         .then(result => {
             res.json(result[0])
         })

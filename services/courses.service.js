@@ -1,8 +1,10 @@
 const connObjectName = require('../utilities/dbConnection')
 
+const selectQuery = `select id as courseId, course_name as courseName, code as courseCode, status as courseStatus from courses`
+
 const coursesServices = {
     getAll: async function(req, res, next) {
-        await connObjectName.query('select * from courses')
+        await connObjectName.query(selectQuery)
         .then(result => {
             res.json(result[0])
         })
@@ -11,7 +13,7 @@ const coursesServices = {
         })
     },
     getById: async function(req, res, next) {
-        await connObjectName.query('select id as courseId, course_name as courseName, code as courseCode, status as courseStatus from courses where id = ?', [req.params.id])
+        await connObjectName.query(`${selectQuery} where id = ?`, [req.params.id])
         .then( ( [data, columns] ) => {
             res.json(data)
         })
@@ -23,7 +25,7 @@ const coursesServices = {
         let model = req.body
 
         await connObjectName.execute(`update courses set course_name = ?, code = ? where id = ?`,
-        [model.courseName, model.code, model.id])
+        [model.courseName, model.courseCode, model.courseId])
         .then(result => {
             res.json(result[0].changedRows)
         })
@@ -35,7 +37,7 @@ const coursesServices = {
         let model = req.body;
 
         await connObjectName.execute(`insert into courses (course_name, code) values (?, ?)`,
-        [model.courseName, model.code])
+        [model.courseName, model.courseCode])
         .then ( result => {
             res.json(result[0].affectedRows)
         })

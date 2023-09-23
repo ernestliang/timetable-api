@@ -40457,7 +40457,7 @@ const coursesServices = {
     mark: async function(req, res, next) {
         let model = req.body;
 
-        await connObjectName.execute(`update courses set status = ${model.status} where id = ${model.id}`)
+        await connObjectName.execute(`update courses set status = ${model.courseStatus} where id = ${model.courseId}`)
             .then(result => {
                 res.json(result[0].changedRows)
             })

@@ -23,6 +23,28 @@ module.exports = router
 
 /***/ }),
 
+/***/ 5677:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const locationsServices = __nccwpck_require__(5290)
+const express = __nccwpck_require__(1204)
+
+const router = express.Router()
+
+router.route('/locations')
+    .get(locationsServices.getAll)
+router.route('/location/id/:id')
+    .get(locationsServices.getById)
+router.route('/location')
+    .put(locationsServices.update)
+    .post(locationsServices.insert)
+router.route('/location/mark')
+    .put(locationsServices.mark)
+
+module.exports = router
+
+/***/ }),
+
 /***/ 4127:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -48,7 +70,7 @@ module.exports = router
 
 /***/ }),
 
-/***/ 6419:
+/***/ 5550:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const subjectsServices = __nccwpck_require__(1230)
@@ -59,11 +81,13 @@ router.route('/subjects')
     .get(subjectsServices.getComplete)
 router.route('/subject/id/:id')
     .get(subjectsServices.getById)
-router.route('/subject/courseId/:courseId')
+router.route('/subject/course/:courseId')
     .get(subjectsServices.getByCourseId)
 router.route('/subject')
     .put(subjectsServices.update)
     .post(subjectsServices.insert)
+router.route('/subject/mark')
+    .put(subjectsServices.mark)
 
 module.exports = router
 
@@ -40385,9 +40409,11 @@ function vary (res, field) {
 
 const connObjectName = __nccwpck_require__(4057)
 
+const selectQuery = `select id as courseId, course_name as courseName, code as courseCode, status as courseStatus from courses`
+
 const coursesServices = {
     getAll: async function(req, res, next) {
-        await connObjectName.query('select * from courses')
+        await connObjectName.query(selectQuery)
         .then(result => {
             res.json(result[0])
         })
@@ -40396,7 +40422,7 @@ const coursesServices = {
         })
     },
     getById: async function(req, res, next) {
-        await connObjectName.query('select id as courseId, course_name as courseName, code as courseCode, status as courseStatus from courses where id = ?', [req.params.id])
+        await connObjectName.query(`${selectQuery} where id = ?`, [req.params.id])
         .then( ( [data, columns] ) => {
             res.json(data)
         })
@@ -40408,7 +40434,7 @@ const coursesServices = {
         let model = req.body
 
         await connObjectName.execute(`update courses set course_name = ?, code = ? where id = ?`,
-        [model.courseName, model.code, model.id])
+        [model.courseName, model.courseCode, model.courseId])
         .then(result => {
             res.json(result[0].changedRows)
         })
@@ -40420,7 +40446,7 @@ const coursesServices = {
         let model = req.body;
 
         await connObjectName.execute(`insert into courses (course_name, code) values (?, ?)`,
-        [model.courseName, model.code])
+        [model.courseName, model.courseCode])
         .then ( result => {
             res.json(result[0].affectedRows)
         })
@@ -40442,6 +40468,73 @@ const coursesServices = {
 }
 
 module.exports = coursesServices
+
+/***/ }),
+
+/***/ 5290:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const connObjectName = __nccwpck_require__(4057)
+const selectQuery = `select id as locationId, code as locationCode, description as locationDes, status as locationStatus from locations`
+
+const locationServices = {
+    getAll: async function(req, res, next) {
+        await connObjectName.query(`${selectQuery}`)
+            .then(result => {
+                res.json(result[0])
+            })
+            .catch(err => {
+                res.status(500).json(err.messages)
+            })
+    },
+    getById: async function(req, res, next) {
+        await connObjectName.query(`${selectQuery} where id = ?`,
+        [req.params.id])
+            .then( ( [data, columns] ) => {
+                res.json(data)
+            })
+            .catch(err => {
+                res.status(500).json(err.messages)
+            })
+    },
+    update: async function(req, res, next) {
+        let model = req.body
+
+        await connObjectName.execute(`update locations set code = ?, description = ? where id = ?`,
+        [model.locationCode, model.locationDes, model.locationId])
+            .then(result => {
+                res.json(result[0].changedRows)
+            })
+            .catch(err => {
+                res.status(500).json(err.message)
+            })
+    },
+    insert: async function(req, res, next) {
+        let model = req.body
+
+        await connObjectName.execute(`insert into locations (code, description) values (?, ?)`, 
+        [model.locationCode, model.locationDes])
+            .then ( result => {
+                res.json(result[0].affectedRows)
+            })
+            .catch(err => {
+                res.status(500).json(err.message)
+            })
+    },
+    mark: async function(req, res, next) {
+        let model = req.body
+
+        await connObjectName.execute(`update locations set status = ${model.locationStatus} where id = ${model.locationId }`)
+            .then(result => {
+                res.json(result[0].changedRows)
+            })
+            .catch(err => {
+                res.status(500).json(err.message)
+            })
+    },
+}
+
+module.exports = locationServices
 
 /***/ }),
 
@@ -40523,7 +40616,7 @@ module.exports = studentsServices
 
 const connObjectName = __nccwpck_require__(4057)
 
-const leftJoinQuery =  `select t1.id AS subjectId, t1.subject_name AS subjectName, t1.code AS subjectCode,
+const leftJoinQuery =  `select t1.id AS subjectId, t1.subject_name AS subjectName, t1.code AS subjectCode, t1.status as status, t1.color as color,
                                     t2.id AS courseId, t2.course_name AS courseName, t2.code AS courseCode
                                         FROM subjects t1
                                             LEFT JOIN courses t2 ON t1.course_id = t2.id`
@@ -40570,8 +40663,8 @@ const subjectsServices = {
     update: async function(req, res, next) {
         let model = req.body
 
-        await connObjectName.execute(`update subjects set subject_name = ?, course_id = ?, code = ? where id = ?`,
-        [model.subjectName, model.courseId, model.code, model.id])
+        await connObjectName.execute(`update subjects set subject_name = ?, course_id = ?, code = ?, color = ? where id = ?`,
+        [model.subjectName, model.courseId, model.subjectCode, model.color, model.subjectId])
         .then(result => {
             res.json(result[0].changedRows)
         })
@@ -40582,8 +40675,8 @@ const subjectsServices = {
     insert: async function(req, res, next) {
         let model = req.body;
 
-        await connObjectName.execute(`insert into subjects (subject_name, course_id, code) values (?, ?, ?)`,
-        [model.subjectName, model.courseId, model.code])
+        await connObjectName.execute(`insert into subjects (subject_name, course_id, code, color) values (?, ?, ?, ?)`,
+        [model.subjectName, model.courseId, model.subjectCode, model.color])
         .then ( result => {
             res.json(result[0].affectedRows)
         })
@@ -40594,7 +40687,7 @@ const subjectsServices = {
     mark: async function(req, res, next) {
         let model = req.body;
 
-        await connObjectName.execute(`update subjects set status = ${model.status} where id = ${model.id}`)
+        await connObjectName.execute(`update subjects set status = ${model.status} where id = ${model.subjectId}`)
             .then(result => {
                 res.json(result[0].changedRows)
             })
@@ -40612,14 +40705,17 @@ module.exports = subjectsServices
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const connObjectName = __nccwpck_require__(4057)
-const leftJoinQuery = `SELECT t1.id AS timetableId, t1.subject_id AS subjectId, t2.subject_name AS subjectName, t2.code AS subjectCode, t3.course_name AS courseName, t3.code AS courseCode, t1.start_time AS startTime, t1.end_time AS endTime, t1.day
+const leftJoinQuery = `SELECT t1.id AS timetableId, t1.subject_id AS subjectId, t2.subject_name AS subjectName, t2.code AS subjectCode,
+                        t3.course_name AS courseName, t3.code AS courseCode, t1.start_time AS startTime, t1.end_time AS endTime, t1.class_day as classDay,
+                        t4.code as classroomCode, t4.description as locationDes,
                         FROM timetable t1
                             LEFT JOIN subjects t2 ON t1.subject_id = t2.id
-                            LEFT JOIN courses t3 ON t2.course_id = t3.id`
+                            LEFT JOIN courses t3 ON t2.course_id = t3.id
+                            LEFT JOIN locations t4 on t4.subject_id = t2.id`
 
 const timetableServices = {
     getAll: async function(req, res, next) {
-        await connObjectName.query(`select * from timetable`)
+        await connObjectName.query(`${leftJoinQuery}`)
         .then(result => {
             res.json(result[0])
         })
@@ -45102,9 +45198,10 @@ var __webpack_exports__ = {};
 const express = __nccwpck_require__(1204);
 const cors = __nccwpck_require__(3873);
 const coursesController = __nccwpck_require__(629);
-const subjectsController = __nccwpck_require__(6419);
-const timetableController = __nccwpck_require__(5432)
-const studentsController = __nccwpck_require__(4127)
+const subjectsController = __nccwpck_require__(5550);
+const timetableController = __nccwpck_require__(5432);
+const studentsController = __nccwpck_require__(4127);
+const locationsController = __nccwpck_require__(5677);
 
 var app = express();
 
@@ -45115,6 +45212,7 @@ app
     .use(subjectsController)
     .use(timetableController)
     .use(studentsController)
+    .use(locationsController)
 
 const portName = process.env.PORT || 3000;
 app.listen(portName, () => {

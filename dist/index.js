@@ -45202,6 +45202,7 @@ const subjectsController = __nccwpck_require__(5550);
 const timetableController = __nccwpck_require__(5432);
 const studentsController = __nccwpck_require__(4127);
 const locationsController = __nccwpck_require__(5677);
+const usersController = reqiore('./controllers/usersController')
 
 var app = express();
 
@@ -45213,6 +45214,7 @@ app
     .use(timetableController)
     .use(studentsController)
     .use(locationsController)
+    .use(usersController)
 
 const portName = process.env.PORT || 3000;
 app.listen(portName, () => {

@@ -14,5 +14,7 @@ router.route('/user')
     .post(usersServices.insert)
 router.route('/user/mark')
     .put(usersServices.mark)
+router.route('/user/authenticate')
+    .post(usersServices.authenticate)
 
 module.exports = router

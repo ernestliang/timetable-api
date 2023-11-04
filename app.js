@@ -5,7 +5,8 @@ const subjectsController = require('./controllers/subjectsController');
 const timetableController = require('./controllers/timetableController');
 const studentsController = require('./controllers/studentsController');
 const locationsController = require('./controllers/locationsController');
-const usersController = reqiore('./controllers/usersController')
+const usersController = require('./controllers/usersController')
+const attedanceController = require('./controllers/attendanceController')
 
 var app = express();
 
@@ -18,6 +19,7 @@ app
     .use(studentsController)
     .use(locationsController)
     .use(usersController)
+    .use(attedanceController)
 
 const portName = process.env.PORT || 3000;
 app.listen(portName, () => {

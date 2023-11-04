@@ -34,8 +34,8 @@ const usersServices = {
     update: async function(req, res, next) {
         let model = req.body
 
-        await connObjectName.execute(`update users set name = ?, email = ?, password = ?, status = ? where id = ?`,
-        [model.subjectName, model.userName, model.userEmail, model.userPassword, model.userId])
+        await connObjectName.execute(`update users set name = ?, email = ?, password = ? where id = ?`,
+        [model.userName, model.userEmail, model.userPassword, model.userId])
         .then(result => {
             res.json(result[0].changedRows)
         })
@@ -46,8 +46,8 @@ const usersServices = {
     insert: async function(req, res, next) {
         let model = req.body;
 
-        await connObjectName.execute(`insert into users (name, email, password, status) values (?, ?, ?, ?)`,
-        [model.userName, model.userEmail, model.userPassword, model.userStatus])
+        await connObjectName.execute(`insert into users (name, email, password) values (?, ?, ?)`,
+        [model.userName, model.userEmail, model.userPassword])
         .then ( result => {
             res.json(result[0].affectedRows)
         })
@@ -66,6 +66,17 @@ const usersServices = {
                 res.status(500).json(err.message)
             })
     },
+    authenticate: async function(req, res, next) {
+        let model = req.body
+
+        await connObjectName.query(`${selectQuery} where email = '${model.userEmail}' and password = '${model.userPassword}'`)
+            .then(([data, fields]) => {
+                res.json(data[0])
+            })
+            .catch(err => {
+                res.status(500).json(err.message)
+            })
+    }
     // upsert: async function(req, res, next) {
     //     let model = req.body
 

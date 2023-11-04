@@ -12,7 +12,7 @@ router.route('/student/email/:email')
 router.route('/student/token/:token')
     .get(studentsServices.getByToken)
 
-router.route('/student')
+router.route('/student/register')
     .post(studentsServices.upsert)
 
 

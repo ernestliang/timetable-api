@@ -57,7 +57,7 @@ const studentsServices = {
             else {
                 await connObjectName.execute(`update students set token = '${model.token}' where email = '${model.email}'`)
                 .then(result => {
-                    res.json(result[0].changedRows)
+                    res.json(result[0].affectedRows)
                 })
             }
         })
